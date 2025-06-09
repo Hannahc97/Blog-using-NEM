@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema
 
-export const PostSchema = new Schema({
+const PostSchema = new Schema({
     title: {
         type: String,
         required: true
@@ -20,3 +20,6 @@ export const PostSchema = new Schema({
         default: Date.now
     },
 })
+
+// ✅ Export only the model
+export const Post = mongoose.model('Post', PostSchema);
