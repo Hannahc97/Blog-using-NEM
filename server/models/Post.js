@@ -23,3 +23,5 @@ const PostSchema = new Schema({
 
 // ✅ Export only the model
 export const Post = mongoose.model('Post', PostSchema);
+
+//  this schema to creates a model and that model saves new posts to the database.
