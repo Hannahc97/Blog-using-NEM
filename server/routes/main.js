@@ -21,11 +21,14 @@ router.get("", async (req, res) => {
     }
 
     try{ 
-
+        const data = await Post.find(); // this finds all the posts and then we render all the data
+        // Pass "locals" to a page and render it, if passing more objects put it in {}
+        res.render("index", { locals, data }) // we are rendering the home page from ./views/index 
     }
-    catch{}
-    // Pass "locals" to a page and render it, if passing more objects put it in {}
-    res.render("index", { locals }) // we are rendering the home page from ./views/index 
+    catch (error) {
+        console.log(error)
+    }
+
 });
 
 
