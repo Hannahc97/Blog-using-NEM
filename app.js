@@ -3,7 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import expressEjsLayouts from "express-ejs-layouts";
 import mainRoutes from "./server/routes/main.js";
-
+import { connectDB } from "./server/config/db.js";
 
 // const express = require("express");
 
@@ -11,6 +11,9 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000; // allows your app to use the port the hosting service provides.
+
+// Connect to DB
+connectDB();
 
 app.use(express.static("public")); // public folder will hold css, js, img
 // don't need to use ../../ as it know it's all in public folder
