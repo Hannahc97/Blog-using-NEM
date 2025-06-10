@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import expressEjsLayouts from "express-ejs-layouts";
 import mainRoutes from "./server/routes/main.js";
 import { connectDB } from "./server/config/db.js";
+import adminRoutes from "./server/routes/admin.js";
 
 // const express = require("express");
 
@@ -15,7 +16,7 @@ const PORT = process.env.PORT || 3000; // allows your app to use the port the ho
 // Connect to DB
 connectDB();
 
-//middleware for a our search bar 
+//middleware for our search bar 
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 
@@ -33,6 +34,8 @@ app.set("view engine", "ejs") //tells Express that you're using EJS (Embedded Ja
 
 app.use("/", mainRoutes);
 //  tells your Express app to use the routes defined in mainRoutes (your main.js file) for any requests that start with /
+
+app.use("/", adminRoutes);
 
 app.listen(PORT, ()=> {
     console.log(`App listening on port ${PORT}`)
