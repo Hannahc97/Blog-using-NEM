@@ -1,6 +1,3 @@
-// import express from "express"
-// const app = express();
-
 //! We have multiple routes - this will have all the main routes like homepage, contact, about etc
 
 import { Router } from "express"; // importing the Router function from Express.
@@ -10,8 +7,8 @@ import { get } from "mongoose";
 const router = Router() // holds all the routes for this module (main.js)
 
 // Routes
-// GET
-// HOME
+//! GET
+//! HOME
 router.get("", async (req, res) => {
 
     // This renders/pass ejs data such as rendering to layouts
@@ -61,20 +58,22 @@ router.get("", async (req, res) => {
 
 });
 
-// GET
-// Posts : id
-
+//! GET
+//! Posts : id
 router.get('/post/:id', async (req, res) => {
     try {
-        let slug = req.params.id;
+        let slug = req.params.id; //getting the params from the url
 
-        const data = await Post.findById({_id: slug});
+        const data = await Post.findById({_id: slug}); // looks in the db and finds one blog post with the _id equal to the one from the URL.
 
-        const locals = {
+        const locals = { //sets up some metadata for the template:
             title: data.title,
             description: "Simple Blog created with NodeJs, Express & MongoDb."
         }
 
+        // render a view called post (like views/post.ejs), and it sends:
+        // locals: Page-level info like title and description
+        // data: The actual post content (title, body, timestamps, etc.)
         res.render('post', { locals, data });
 
     } catch (error) {
@@ -82,29 +81,28 @@ router.get('/post/:id', async (req, res) => {
     }
 });
 
-// POST
-// Post - searchTerm
+//! POST
+//! Post - searchTerm
 router.post('/search', async (req, res) => {
     try {
-        const locals = {
+        const locals = { //metadata
             title: "Search",
             description: "Simple Blog created with NodeJs, Express & MongoDb."
         }
 
-        let searchTerm = req.body.searchTerm //grabbing the name=searchTerm from search.ejs
+        let searchTerm = req.body.searchTerm //grabbing the "name=searchTerm" from search.ejs
 
-        const searchNoSpecialChar = searchTerm.replace(/[^a-zA-Z0-9]/g, "") // regEx good for validation or searching
+        const searchNoSpecialChar = searchTerm.replace(/[^a-zA-Z0-9]/g, "") // regEx good for validation or searching --> remove any special characters from the search term, leaving only letters and numbers -->  e.g. if someone searched "Hello!" it turns into "Hello".
 
-
-        const data = await Post.find({
-            $or: [
+        const data = await Post.find({ // searches the posts collection.
+            $or: [ // looks for posts where either the title OR the body matches the search term
                 {title: {$regex: new RegExp(searchNoSpecialChar, "i")}},
                 {body: {$regex: new RegExp(searchNoSpecialChar, "i")}}
-            ]
-        });
+            ] // builds a case-insensitive search (the "i" means ignore case).
+        }); // If searchNoSpecialChar is "node", it will find posts with "Node", "node", "NODE", in the title or body.
 
-        res.render("search", {
-            data, locals
+        res.render("search", { //  Sends the search results (data) and page info (locals) to the 
+            data, locals // search.ejs view to display the matched posts.
         });
     } catch (error) {
         console.log(error);
@@ -117,6 +115,30 @@ router.get("/about", (req, res) => {
 });
 
 export default router // exports the router so you can use it in your main app file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
