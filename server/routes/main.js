@@ -15,24 +15,50 @@ router.get("", async (req, res) => {
 
     // This renders/pass ejs data such as rendering to layouts
     // Created an object with title & description so we can pass it to a page 
-    const locals = { 
+
+
+    try{
+        const locals = { 
         title: "Node.js blog",
         description: "A simple blog made with node.js, express and MongoDb"
-    }
+        }
+        
+        //? pagination 
+        let postsPerPage = 10;
+        let page = req.query.page || 1; // in the url "?page=2", default page is 1
+        
+        // Sorts the posts by newest first (most recent createdAt at the top
+        const data = await Post.aggregate([{$sort: {createdAt: -1}}])
+        .skip(postsPerPage * page - postsPerPage) // Eg If you’re on page 2 & each page shows 10 posts, skip the first 10.
+        .limit(postsPerPage)
+        .exec(); // executes aggregated pipeline/ Runs the query.
 
-    try{ 
-        const data = await Post.find(); // this finds all the posts and then we render all the data
+        // gets the total number of posts in the database — so you know how many pages there will be
+        const count = await Post.countDocuments(); 
+        // checks whether there should be a “Next” page:
+        const nextPage = parseInt(page) + 1; // Adds 1 to the current page (nextPage)
+        const hasNextPage = nextPage <= Math.ceil(count / postsPerPage);
+        // Checks if that number is less than or equal to the total number of pages
+            // Math.ceil(count / postsPerPage) gives the total number of pages
+        // If yes, hasNextPage is true. Otherwise, it's false.
+
+        // this finds all the posts and then we render all the data
+        // const data = await Post.find(); 
+
+        // renders the index view and sends it:
         // Pass "locals" to a page and render it, if passing more objects put it in {}
-        res.render("index", { locals, data }) // we are rendering the home page from ./views/index 
+        res.render("index", { // we are rendering the home page from ./views/index 
+            locals, // The blog title and description
+            data, // The blog posts to show
+            current: page, // The current page number
+            nextPage: hasNextPage? nextPage : null // The next page number (or null if there's no next page)
+        }) 
     }
     catch (error) {
         console.log(error)
     }
 
 });
-
-
-
 
 router.get("/about", (req, res) => {
     res.render("about")  
