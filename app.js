@@ -1,5 +1,5 @@
 // npm run dev to run the app
-import express from "express";
+import express, { urlencoded } from "express";
 import dotenv from "dotenv";
 import expressEjsLayouts from "express-ejs-layouts";
 import mainRoutes from "./server/routes/main.js";
@@ -14,6 +14,10 @@ const PORT = process.env.PORT || 3000; // allows your app to use the port the ho
 
 // Connect to DB
 connectDB();
+
+//middleware for a our search bar 
+app.use(express.urlencoded({extended: true}))
+app.use(express.json())
 
 app.use(express.static("public")); // public folder will hold css, js, img
 // don't need to use ../../ as it know it's all in public folder
