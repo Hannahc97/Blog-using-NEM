@@ -49,16 +49,20 @@ router.post('/admin', async (req, res) => {
  * POST /
  * Admin - register
 */
-router.post('/register', async (req, res) => {
+
+//  sets up the route to handle a POST request to /register, which happens when the registration form is submitted.
+router.post('/register', async (req, res) => { 
     try {
+        // pulls the username and password fields from the submitted form (input name="username")
         const {username, password} = req.body; //getting from register form
         const hashedPassword = await bcrypt.hash(password, 10) //hashing pw
 
-        try{ // create the user
+        try{ // saves the new user into the database using your User model
+            // User.create adds a new record to MongoDB & stores the hashed password
             const user = await User.create({username, password: hashedPassword})
             res.status(201).json({message: "user created", user}) // for testing purposes
         } catch(error){
-            if(error.code === 11000){
+            if(error.code === 11000){ // (duplicate key error in MongoDB).
                 res.status(409).json({message: "User already in use"})
             }
             res.status(500).json({message: "Internal server error"})
