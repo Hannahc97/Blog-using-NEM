@@ -293,6 +293,11 @@ img{
     right: 0;
     color: var(--gray-light);
     padding: 15px;
+    cursor: pointer;
+}
+
+#searchClose:hover{
+    color: #4c4257;
 }
 
 /* Dashboard Admin */
