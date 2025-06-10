@@ -2,25 +2,34 @@ import { Router } from "express";
 import { Post } from "../models/Post.js";
 import { User } from "../models/User.js";
 import bcrypt from "bcrypt"; // helps encrypt/decrypt pw
-import * as jwt from 'jsonwebtoken'
+// import * as jwt from 'jsonwebtoken'
+// import jwt from 'jsonwebtoken';
+// import { sign, decode, verify } from 'jsonwebtoken'
+// import pkg from 'jsonwebtoken';
+// const { sign, decode, verify } = pkg;
+import dotenv from "dotenv";
+import jwt from 'jsonwebtoken';
+
+dotenv.config();
 
 const router = Router()
 
 const adminLayout = "../views/layouts/admin"
+
+const jwtSecret = process.env.JWT_SECRET
 
 /**
  * GET /
  * Admin - Login page
 */
 router.get('/admin', async (req, res) => {
-
     try {
         const locals = {
             title: "Admin",
             description: "Simple Blog created with NodeJs, Express & MongoDb."
         }
 
-        res.render('admin/login', { locals, layout: adminLayout }); // tells Express to render the admin/login view,  tells the view engine to use a specific layout for the admin pages
+        res.render('admin/login', { locals, layout: adminLayout }); // tells Express to render the admin/login view, tells the view engine to use a specific layout for the admin pages
     } catch (error) {
         console.log(error);
     }
@@ -32,14 +41,38 @@ router.get('/admin', async (req, res) => {
 */
 router.post('/admin', async (req, res) => {
     try {
-
         const {username, password} = req.body;
-        if(req.body.username === "admin" && req.body.password === "password"){
-            res.redirect
+        const user = await User.findOne({username})
+        if(!user){
+            return res.status(401).json({message: "invalid credentials"})
         }
 
-        // res.render('admin/login', { locals, layout: adminLayout });
-        res.redirect("/admin")
+        const isPasswordValid = await bcrypt.compare(password, user.password)
+        if(!isPasswordValid){
+            return res.status(401).json({message: "invalid credentials"})
+        }
+
+        //save a token to the cookie
+        const token = jwt.sign({ userId: user._id}, jwtSecret );
+        res.cookie("token", token), {httpOnly: true}
+        res.redirect("/dashboard")
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+/**
+ * GET /
+ * Admin - Dashboard
+*/
+router.get('/dashboard', async (req, res) => {
+    try {
+        const locals = {
+            title: "Admin",
+            description: "Simple Blog created with NodeJs, Express & MongoDb."
+        }
+
+        res.render('./admin/dashboard'); // tells Express to render the admin/dashboard view, tells the view engine to use a specific layout for the admin pages
     } catch (error) {
         console.log(error);
     }
@@ -49,7 +82,6 @@ router.post('/admin', async (req, res) => {
  * POST /
  * Admin - register
 */
-
 //  sets up the route to handle a POST request to /register, which happens when the registration form is submitted.
 router.post('/register', async (req, res) => { 
     try {
