@@ -176,7 +176,7 @@ img{
     margin-bottom: 5px;
 }
 
-.author--body{
+.author__body{
     font-size: var(--font-size-md);
     margin: 5px 0 40px 0;
 }
@@ -238,7 +238,7 @@ img{
 }
 
 .article-ul:hover li{
-    filter: blur(3px);
+    filter: blur(1px);
 }
 
 .article-ul:hover li:hover{
@@ -259,6 +259,7 @@ img{
 
 .article{
     white-space: pre-wrap;
+    font-size: 2.5rem;
 }
 
 /* Footer */

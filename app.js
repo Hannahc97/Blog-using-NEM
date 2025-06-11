@@ -2,6 +2,7 @@
 import express, { urlencoded } from "express";
 import dotenv from "dotenv";
 import expressEjsLayouts from "express-ejs-layouts";
+import methodOverride from "method-override";
 import mainRoutes from "./server/routes/main.js";
 import { connectDB } from "./server/config/db.js";
 import adminRoutes from "./server/routes/admin.js";
@@ -33,6 +34,8 @@ app.use(session({ // session stores user data between HTTP requests (e.g., stayi
         mongoUrl: process.env.MONGODB_URL // connects it to your MongoDB database.
     })
 }))
+
+app.use(methodOverride("_method"))
 
 app.use(express.static("public")); // public folder will hold css, js, img
 // don't need to use ../../ as it know it's all in public folder
