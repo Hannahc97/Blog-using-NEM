@@ -13,10 +13,27 @@ import jwt from 'jsonwebtoken';
 dotenv.config();
 
 const router = Router()
-
 const adminLayout = "../views/layouts/admin"
-
 const jwtSecret = process.env.JWT_SECRET
+
+/**
+ * Check Login --> need to add this middleware to pages that require login
+ * protect certain routes, making sure only logged-in users can access them
+ * If you change/delete the token in dev tools the dashboard page will show unauthorised
+*/
+const authMiddleware = (req, res, next) => { // Middleware in Express is code that runs before the main route handler
+    const token = req.cookies.token; // tries to get the token from the user's browser cookies, which was saved during login (res.cookie("token", token, { httpOnly: true });)
+    if(!token){ // If the cookie isn’t there
+        return res.status(401).json({message: "unauthorised"}) // sends error & stops request
+    }
+    try{ // if we have the token
+        const decoded = jwt.verify(token, jwtSecret); // Uses jwt.verify() to decode and verify the token using your secret
+        req.userId = decoded.userId; // If successful, it pulls out the user ID and attaches it to req.userId so other routes can use it
+        next() // next() is a function that moves to the next step if everything is okay
+    } catch(error){
+        return res.status(401).json({message: "unauthorised"})
+    }
+}
 
 /**
  * GET /
@@ -54,7 +71,7 @@ router.post('/admin', async (req, res) => {
         if(!isPasswordValid){ //  If the password doesn’t match, return 401 response
             return res.status(401).json({message: "invalid credentials"})
         }
-        // If both checks pass, create a JWT (JSON Web Token). Token stores the user’s ID (as a payload), and it's signed with a secret. Token can be used to identify the user on future requests
+        // If both checks pass, create a JWT (JSON Web Token). Token stores the user’s ID (as a payload), and it's signed with a secret. Token can be used to identify the user on future requests, it keeps you logged in 
         const token = jwt.sign({ userId: user._id}, jwtSecret );
 
         // Stores the token in a cookie on the user’s browser.
@@ -70,13 +87,12 @@ router.post('/admin', async (req, res) => {
  * GET /
  * Admin - Dashboard
 */
-router.get('/dashboard', async (req, res) => {
+router.get('/dashboard', authMiddleware, async (req, res) => {
     try {
         const locals = {
             title: "Admin",
             description: "Simple Blog created with NodeJs, Express & MongoDb."
         }
-
         res.render('./admin/dashboard'); // tells Express to render the admin/dashboard view, tells the view engine to use a specific layout for the admin pages
     } catch (error) {
         console.log(error);
