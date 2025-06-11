@@ -39,23 +39,28 @@ router.get('/admin', async (req, res) => {
  * POST /
  * Admin - Check Login
 */
+// sets up the route to handle form submissions to /admin
 router.post('/admin', async (req, res) => {
     try {
+        // Pulls the submitted username and password from the login form (input name="username")
         const {username, password} = req.body;
-        const user = await User.findOne({username})
-        if(!user){
+        // Looks up a user in the MongoDB database by their username, 
+        const user = await User.findOne({username})//if no matching user is found, user will be null
+        if(!user){// If user doesn’t exist, send 401 Unauthorized response and stop login process
             return res.status(401).json({message: "invalid credentials"})
         }
-
+        // Uses bcrypt.compare() to check if the password entered in the form matches hashed password stored in database
         const isPasswordValid = await bcrypt.compare(password, user.password)
-        if(!isPasswordValid){
+        if(!isPasswordValid){ //  If the password doesn’t match, return 401 response
             return res.status(401).json({message: "invalid credentials"})
         }
-
-        //save a token to the cookie
+        // If both checks pass, create a JWT (JSON Web Token). Token stores the user’s ID (as a payload), and it's signed with a secret. Token can be used to identify the user on future requests
         const token = jwt.sign({ userId: user._id}, jwtSecret );
-        res.cookie("token", token), {httpOnly: true}
-        res.redirect("/dashboard")
+
+        // Stores the token in a cookie on the user’s browser.
+        // httpOnly: true means JavaScript can’t access the cookie — good for security
+        res.cookie("token", token, {httpOnly: true})
+        res.redirect("/dashboard") //  Once the cookie is set, it redirects the user to /dashboard
     } catch (error) {
         console.log(error);
     }
