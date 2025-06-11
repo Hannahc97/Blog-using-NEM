@@ -90,14 +90,78 @@ router.post('/admin', async (req, res) => {
 router.get('/dashboard', authMiddleware, async (req, res) => {
     try {
         const locals = {
-            title: "Admin",
+            title: "Dashboard",
             description: "Simple Blog created with NodeJs, Express & MongoDb."
         }
-        res.render('./admin/dashboard'); // tells Express to render the admin/dashboard view, tells the view engine to use a specific layout for the admin pages
+
+        const data = await Post.find(); // getting all the posts 
+        // tells Express to render the admin/dashboard view, tells the view engine to use a specific layout for the admin pages
+        res.render("./admin/dashboard", {
+            locals,
+            data,
+            layout: adminLayout
+        });
     } catch (error) {
         console.log(error);
     }
 });
+
+
+/**
+ * GET /
+ * Admin - Create New Post page
+*/
+router.get('/add-post', authMiddleware, async (req, res) => {
+    try {
+        const locals = {
+            title: "Add Post",
+            description: "Simple Blog created with NodeJs, Express & MongoDb."
+        }
+
+        const data = await Post.find()
+
+        res.render("./admin/add-post", {
+            locals,
+            data,
+            layout: adminLayout
+        });
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+
+/**
+ * POST /
+ * Admin - Create New Post
+*/
+router.post('/add-post', authMiddleware, async (req, res) => {
+    try{
+        try {
+            const newPost = new Post({
+                title: req.body.title,
+                body: req.body.body
+            })
+
+            await Post.create(newPost)
+            res.redirect("/dashboard")
+
+            } catch (error) {
+                console.log(error);
+            }
+    } catch (error){
+        console.log(error)
+    }
+});
+
+
+
+
+
+
+
+
+
 
 /**
  * POST /
