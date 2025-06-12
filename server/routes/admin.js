@@ -111,16 +111,16 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
  * GET /
  * Admin - Create New Post page
 */
-router.get('/add-post', authMiddleware, async (req, res) => {
+router.get('/add-post', authMiddleware, async (req, res) => { // showing the “Add New Post” form,  using await to fetch data from MongoDB
     try {
         const locals = {
             title: "Add Post",
             description: "Simple Blog created with NodeJs, Express & MongoDb."
         }
 
-        const data = await Post.find()
+        const data = await Post.find() //  fetches all existing blog posts from MongoDB using Mongoose
 
-        res.render("./admin/add-post", {
+        res.render("./admin/add-post", { // Render the EJS (or other templating) file located at views/admin/add-post.ejs
             locals,
             data,
             layout: adminLayout
@@ -139,14 +139,14 @@ router.post('/add-post', authMiddleware, async (req, res) => {
     try{
         try {
             const newPost = new Post({
-                title: req.body.title,
-                body: req.body.body
-            })
+                title: req.body.title, // grabs title and body from the form submission (req.body)
+                body: req.body.body // creates a new Mongoose model instance using the Post schema
+            }) // <input name="title" />  <textarea name="body"></textarea>
 
-            await Post.create(newPost)
-            res.redirect("/dashboard")
+            await Post.create(newPost) // saves the new post to your MongoDB database
+            res.redirect("/dashboard") // then redirected to the dashboard
 
-            } catch (error) {
+            } catch (error) { // errors while saving the post (like missing fields, DB issues).
                 console.log(error);
             }
     } catch (error){
@@ -167,9 +167,10 @@ router.get('/edit-post/:id', authMiddleware, async (req, res) => {
             description: "Simple Blog created with NodeJs, Express & MongoDb."
         }
 
-        const data = await Post.findOne({_id: req.params.id})
+        const data = await Post.findOne({_id: req.params.id}) // req.params.id Gets the post ID from the URL
+        // Post.findOne({_id: ...}): Finds the post in the MongoDB collection by its ID
 
-        res.render("./admin/edit-post", {
+        res.render("./admin/edit-post", { // renders the views/admin/edit-post.ejs template
             locals,
             data,
             layout: adminLayout
@@ -185,14 +186,17 @@ router.get('/edit-post/:id', authMiddleware, async (req, res) => {
  * Admin  Edit Post
 */
 router.put('/edit-post/:id', authMiddleware, async (req, res) => {
-    try {
-        await Post.findByIdAndUpdate(req.params.id, {
-            title: req.body.title,
+    try { // Mongoose method that finds by its ID
+        await Post.findByIdAndUpdate(req.params.id, { // Gets the post ID from the URL
+            title: req.body.title, // come from the form fields 
             body: req.body.body,
             updatedAt: Date.now()
         })
 
-        res.redirect(`/edit-post/${req.params.id}`)
+        //redirected back to the same edit page
+        // res.redirect(`/edit-post/${req.params.id}`) 
+        // Redirect with ?updated=true to show window alert, have put in main.js 
+        res.redirect(`/post/${req.params.id}?updated=true`)
 
     } catch (error) {
         console.log(error);
@@ -204,7 +208,8 @@ router.put('/edit-post/:id', authMiddleware, async (req, res) => {
  * Admin - delete Post
 */
 router.delete('/delete-post/:id', authMiddleware, async (req, res) => {
-    try {
+    try {// grabs the post ID from the URL.
+        //  tells MongoDB to delete one post whose _id matches the provided ID.
         await Post.deleteOne({ _id: req.params.id})
 
         res.redirect(`/dashboard`);

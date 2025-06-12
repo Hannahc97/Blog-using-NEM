@@ -70,11 +70,13 @@ router.get('/post/:id', async (req, res) => {
             title: data.title,
             description: "Simple Blog created with NodeJs, Express & MongoDb."
         }
+         // Check for the ?updated=true query string
+        const message = req.query.updated === "true" ? "Post updated successfully!" : null
 
         // render a view called post (like views/post.ejs), and it sends:
         // locals: Page-level info like title and description
         // data: The actual post content (title, body, timestamps, etc.)
-        res.render('post', { locals, data });
+        res.render('post', { locals, data, message});
 
     } catch (error) {
         console.log(error);
