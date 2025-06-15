@@ -9,8 +9,9 @@ import adminRoutes from "./server/routes/admin.js";
 import cookieParser from "cookie-parser";
 import MongoStore from "connect-mongo";
 import session from "express-session";
+import isActiveRoute from "./server/helpers/routeHelpers.js";
 
-// const express = require("express");
+
 
 dotenv.config();
 
@@ -23,6 +24,8 @@ connectDB();
 //middleware for our search bar 
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
+
+
 
 //middleware for our cookie parser and sessions
 app.use(cookieParser()) // lets you read cookies sent by the browser &can access cookies via req.cookies.
@@ -47,12 +50,18 @@ app.set("layout", "./layouts/main"); // tells Express EJS Layouts where your mai
 // "Use the ./layouts/main.ejs file as the base layout for all views."
 app.set("view engine", "ejs") //tells Express that you're using EJS (Embedded JavaScript) as the view engine.
 
+app.locals.isActiveRoute = isActiveRoute
+
+
+
 //! We don't want all our routes in app.js so put them in main.js
 
 app.use("/", mainRoutes);
 //  tells your Express app to use the routes defined in mainRoutes (your main.js file) for any requests that start with /
 
 app.use("/", adminRoutes);
+
+
 
 app.listen(PORT, ()=> {
     console.log(`App listening on port ${PORT}`)

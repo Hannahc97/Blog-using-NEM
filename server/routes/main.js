@@ -49,7 +49,8 @@ router.get("", async (req, res) => {
             locals, // The blog title and description
             data, // The blog posts to show
             current: page, // The current page number
-            nextPage: hasNextPage? nextPage : null // The next page number (or null if there's no next page)
+            nextPage: hasNextPage? nextPage : null, // The next page number (or null if there's no next page)
+            currentRoute: "/"
         }) 
     }
     catch (error) {
@@ -76,7 +77,12 @@ router.get('/post/:id', async (req, res) => {
         // render a view called post (like views/post.ejs), and it sends:
         // locals: Page-level info like title and description
         // data: The actual post content (title, body, timestamps, etc.)
-        res.render('post', { locals, data, message});
+        res.render('post', { 
+            locals, 
+            data, 
+            message, 
+            currentRoute: `/post/${slug}`
+        });
 
     } catch (error) {
         console.log(error);
@@ -104,7 +110,9 @@ router.post('/search', async (req, res) => {
         }); // If searchNoSpecialChar is "node", it will find posts with "Node", "node", "NODE", in the title or body.
 
         res.render("search", { //  Sends the search results (data) and page info (locals) to the 
-            data, locals // search.ejs view to display the matched posts.
+            data, 
+            locals, // search.ejs view to display the matched posts.
+            currentRoute: '/'
         });
     } catch (error) {
         console.log(error);
@@ -113,7 +121,15 @@ router.post('/search', async (req, res) => {
 
 
 router.get("/about", (req, res) => {
-    res.render("about")  
+    res.render("about", {
+        currentRoute: `/about`
+    })  
+});
+
+router.get("/contact", (req, res) => {
+    res.render("contact", {
+        currentRoute: `/contact`
+    })  
 });
 
 export default router // exports the router so you can use it in your main app file

@@ -21,7 +21,7 @@ const jwtSecret = process.env.JWT_SECRET
  * protect certain routes, making sure only logged-in users can access them
  * If you change/delete the token in dev tools the dashboard page will show unauthorised
 */
-const authMiddleware = (req, res, next) => { // Middleware in Express is code that runs before the main route handler
+export const authMiddleware = (req, res, next) => { // Middleware in Express is code that runs before the main route handler
     const token = req.cookies.token; // tries to get the token from the user's browser cookies, which was saved during login (res.cookie("token", token, { httpOnly: true });)
     if(!token){ // If the cookie isn’t there
         return res.status(401).json({message: "unauthorised"}) // sends error & stops request
@@ -43,8 +43,9 @@ router.get('/admin', async (req, res) => {
     try {
         const locals = {
             title: "Admin",
-            description: "Simple Blog created with NodeJs, Express & MongoDb."
-        }
+            description: "Simple Blog created with NodeJs, Express & MongoDb.",
+            error: req.query.error === "1" // Make it pass the error flag to your EJS view, convert to true/false
+        };
 
         res.render('admin/login', { locals, layout: adminLayout }); // tells Express to render the admin/login view, tells the view engine to use a specific layout for the admin pages
     } catch (error) {
@@ -63,13 +64,16 @@ router.post('/admin', async (req, res) => {
         const {username, password} = req.body;
         // Looks up a user in the MongoDB database by their username, 
         const user = await User.findOne({username})//if no matching user is found, user will be null
-        if(!user){// If user doesn’t exist, send 401 Unauthorized response and stop login process
-            return res.status(401).json({message: "invalid credentials"})
+        if(!user){
+            // If user doesn’t exist, send 401 Unauthorized response and stop login process
+            // return res.status(401).json({message: "invalid credentials"})
+            return res.redirect("/admin?error=1")
         }
         // Uses bcrypt.compare() to check if the password entered in the form matches hashed password stored in database
         const isPasswordValid = await bcrypt.compare(password, user.password)
-        if(!isPasswordValid){ //  If the password doesn’t match, return 401 response
-            return res.status(401).json({message: "invalid credentials"})
+        if(!user || !isPasswordValid){ //  If the password doesn’t match, return 401 response
+            // return res.status(401).json({message: "invalid credentials"})
+            return res.redirect("/admin?error=1") //  redirect back to the login page with an error in the query string
         }
         // If both checks pass, create a JWT (JSON Web Token). Token stores the user’s ID (as a payload), and it's signed with a secret. Token can be used to identify the user on future requests, it keeps you logged in 
         const token = jwt.sign({ userId: user._id}, jwtSecret );
@@ -219,7 +223,15 @@ router.delete('/delete-post/:id', authMiddleware, async (req, res) => {
     }
 });
 
-
+/**
+ * GET /
+ * Admin - Logout
+*/
+router.get("/logout", (req, res) => {
+    res.clearCookie("token");
+    // res.json({message: "Logout Successful"})
+    res.redirect("/")
+})
 
 
 
@@ -238,13 +250,44 @@ router.post('/register', async (req, res) => {
         try{ // saves the new user into the database using your User model
             // User.create adds a new record to MongoDB & stores the hashed password
             const user = await User.create({username, password: hashedPassword})
-            res.status(201).json({message: "user created", user}) // for testing purposes
+
+            // Create a JWT (JSON Web Token). Token stores the user’s ID (as a payload), and it's signed with a secret. Token can be used to identify the user on future requests, it keeps you logged in 
+            const token = jwt.sign({ userId: user._id}, jwtSecret );
+
+            // Stores the token in a cookie on the user’s browser.
+            // httpOnly: true means JavaScript can’t access the cookie — good for security
+            res.cookie("token", token, {httpOnly: true})
+            //  Once the cookie is set, it redirects the user to registered page
+            
+            res.redirect(`/registered/${user._id}`)
+            // for testing purposes
+            // res.status(201).json({message: "user created", user}) 
+
         } catch(error){
             if(error.code === 11000){ // (duplicate key error in MongoDB).
                 res.status(409).json({message: "User already in use"})
             }
             res.status(500).json({message: "Internal server error"})
         }
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+/**
+ * GET /
+ * Admin - redirects to registered page
+*/
+router.get('/registered/:id', authMiddleware, async (req, res) => {
+    try {
+        const userParams = req.params.id
+        const newUser = await User.findById(userParams);
+
+        res.render("./admin/registered", {
+            newUser,
+            currentRoute: `/post/${userParams}`,
+            layout: adminLayout
+        })
     } catch (error) {
         console.log(error);
     }

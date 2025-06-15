@@ -88,7 +88,7 @@ img{
     grid-template-rows: auto;
     padding-top: 10px;
     grid-template-areas:
-    "logo button"
+    "logo search-login"
     "menu menu"
 }
 
@@ -96,7 +96,7 @@ img{
     .header{
         grid-template-columns: auto 1fr auto;
         grid-template-areas:
-        "logo menu button"
+        "logo menu search-login"
     }
 }
 
@@ -117,6 +117,14 @@ img{
     justify-content: center;
 }
 
+.search-login-container {
+    grid-area: search-login;
+    display: flex;
+    gap: 1rem;
+    justify-content: end;
+    align-items: center;
+}
+
 .header__searchBtn{
     grid-area: button;
     display: flex;
@@ -128,17 +136,35 @@ img{
     gap: 0.3rem;
     align-items: center;
     border: 0;
-    padding: 6px 12px;
+    padding: 10px 15px;
     background: none;
-    border-radius: var(--border-radius);
     border: 2px solid transparent;
     font-size: var(--font-size-base);
-    font-weight: 600;
+    font-weight: 100;
     color: var(--black);
     background-color: #DFC2FF;
 }
 
 .header__searchBtn button:hover{
+    border: 2px solid var(--black);
+}
+
+.login{
+    background-color: #DFC2FF;
+    align-items: center;
+    display: flex;
+    padding: 10px 15px;
+    border: 0;
+    border: 2px solid transparent;
+}
+
+.login a {
+    text-decoration: none;
+    color: var(--black);
+    font-weight: 500;
+}
+
+.login:hover {
     border: 2px solid var(--black);
 }
 
@@ -161,8 +187,9 @@ img{
     text-decoration: underline;
 }
 
-.header__nav ul a:active {
-    color: var(--gray);
+.header__nav ul a.active {
+    /* color: var(--gray); */
+    color: #DFC2FF;
 }
 
 /* Author - Homepage */
@@ -293,13 +320,13 @@ img{
     position: absolute;
     top: 0;
     right: 0;
-    color: var(--gray-light);
+    color: var(--black);
     padding: 15px;
     cursor: pointer;
 }
 
 #searchClose:hover{
-    color: #4c4257;
+    text-decoration: underline;
 }
 
 /* Dashboard Admin */
@@ -335,3 +362,5 @@ img{
     justify-content: space-between;
     padding: 10px 0;
 }
+
+

@@ -1,5 +1,6 @@
 <h3>Sign in </h3>
 
+
 <form action="/admin" method="POST">
 
     <label for="username"><b>Username</b></label>
@@ -24,3 +25,10 @@
     <input type="submit" value="Register" class="btn">
 
 </form>
+
+
+<% if (locals.error) { %>
+    <script>
+        alert("Invalid credentials. Please try again.")
+    </script>
+<% } %>
